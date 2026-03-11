@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>战斗副本</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a1a;--card:#12122a;--card2:#1a1a35;--purple:#7c3aed;--purple2:#a855f7;--gold:#fbbf24;--green:#10b981;--blue:#3b82f6;--red:#ef4444;--orange:#f97316;--text:#e8e0ff;--dim:#6b5f8f;--border:rgba(124,58,237,0.25)}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px;overflow-x:hidden;background-image:radial-gradient(ellipse at 50% 0%,rgba(124,58,237,0.3) 0%,transparent 60%)}
+
+/* TOP NAV */
+.topnav{display:flex;align-items:center;padding:16px;gap:12px}
+.back-btn{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:8px 14px;font-size:13px;font-weight:800;cursor:pointer;color:var(--text)}
+.nav-title{font-size:16px;font-weight:900;background:linear-gradient(135deg,#ef4444,#fbbf24);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.battles-badge{margin-left:auto;background:rgba(239,68,68,.2);border:1px solid rgba(239,68,68,.4);color:#fca5a5;font-size:12px;font-weight:800;padding:5px 12px;border-radius:12px}
+
+/* HERO INFO */
+.hero-bar{margin:0 16px 12px;background:var(--card);border:1px solid var(--border);border-radius:20px;padding:14px 16px}
+.hero-row{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.hero-sprite{font-size:40px;filter:drop-shadow(0 0 10px rgba(168,85,247,.6))}
+.hero-info{flex:1}
+.hero-name-sm{font-size:14px;font-weight:900;color:var(--text)}
+.hero-stats-row{display:flex;gap:12px;font-size:11px;color:var(--dim);margin-top:2px}
+.hero-stats-row span{color:var(--gold);font-weight:800}
+.hp-row{display:flex;align-items:center;gap:8px}
+.hp-label{font-size:11px;color:var(--dim);width:30px;flex-shrink:0}
+.hp-track{flex:1;height:10px;background:rgba(255,255,255,.07);border-radius:10px;overflow:hidden}
+.hp-fill{height:100%;border-radius:10px;transition:width .5s ease}
+.hp-fill.hero{background:linear-gradient(90deg,#10b981,#34d399)}
+.hp-fill.enemy{background:linear-gradient(90deg,#ef4444,#f97316)}
+.hp-num{font-size:11px;font-weight:800;width:60px;text-align:right;flex-shrink:0}
+
+/* SCENE */
+.scene{margin:0 16px 12px;background:var(--card);border:1px solid var(--border);border-radius:20px;padding:20px 16px;min-height:200px;position:relative;overflow:hidden}
+.scene-bg{position:absolute;inset:0;opacity:.05;font-size:100px;display:flex;align-items:center;justify-content:center;pointer-events:none}
+.battle-area{display:flex;align-items:center;justify-content:space-around;margin-bottom:16px;position:relative;z-index:1}
+.fighter{text-align:center;flex:1}
+.fighter-sprite{font-size:56px;display:block;transition:transform .2s}
+.fighter-sprite.attack{animation:attack-anim .4s ease}
+.fighter-sprite.hurt{animation:hurt-anim .3s ease}
+.fighter-sprite.dead{filter:grayscale(1) opacity(.3)}
+@keyframes attack-anim{0%{transform:scale(1)}30%{transform:scale(1.3) translateX(20px)}100%{transform:scale(1)}}
+@keyframes hurt-anim{0%,100%{transform:translateX(0)}25%{transform:translateX(-10px)}75%{transform:translateX(10px)}}
+.fighter-name{font-size:12px;font-weight:800;margin-top:4px}
+.vs-text{font-size:24px;font-weight:900;color:var(--red);text-shadow:0 0 10px var(--red)}
+.enemy-bar{margin-top:8px}
+
+/* BATTLE LOG */
+.log-box{height:80px;overflow-y:auto;background:rgba(0,0,0,.3);border-radius:12px;padding:8px 12px;font-size:12px;line-height:1.8;color:var(--dim)}
+.log-box::-webkit-scrollbar{width:3px}.log-box::-webkit-scrollbar-thumb{background:var(--purple)}
+.log-line{animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateX(-5px)}to{opacity:1;transform:translateX(0)}}
+.log-line.hero-atk{color:#86efac}.log-line.enemy-atk{color:#fca5a5}.log-line.special{color:var(--gold)}.log-line.info{color:var(--blue)}
+
+/* SKILL BUTTONS */
+.skills-area{margin:0 16px 12px}
+.skills-title{font-size:12px;color:var(--dim);letter-spacing:2px;margin-bottom:8px;padding:0 4px}
+.skills-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.skill-btn{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:12px;cursor:pointer;transition:all .15s;text-align:left;position:relative;overflow:hidden}
+.skill-btn:active{transform:scale(.96)}
+.skill-btn.disabled{opacity:.4;cursor:not-allowed}
+.skill-btn.locked{opacity:.3}
+.skill-btn-top{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.skill-icon{font-size:24px}
+.skill-name{font-size:13px;font-weight:900;color:var(--text)}
+.skill-desc{font-size:10px;color:var(--dim);line-height:1.3}
+.skill-cost{position:absolute;top:8px;right:10px;font-size:10px;color:var(--gold);font-weight:800}
+.skill-cd{position:absolute;bottom:8px;right:10px;font-size:10px;color:var(--red);font-weight:800}
+.skill-locked-tag{font-size:9px;color:var(--red);margin-top:2px}
+
+/* SHOP */
+.shop-area{margin:0 16px 12px}
+.shop-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;padding:0 4px}
+.shop-title{font-size:12px;color:var(--dim);letter-spacing:2px}
+.coins-display{font-size:13px;font-weight:900;color:var(--gold)}
+.shop-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.shop-item{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:12px;cursor:pointer;transition:all .15s;position:relative}
+.shop-item:active{transform:scale(.96)}
+.shop-item.owned{border-color:rgba(16,185,129,.4);background:rgba(16,185,129,.07)}
+.shop-item.equipped{border-color:var(--gold);background:rgba(251,191,36,.07)}
+.item-icon{font-size:28px;margin-bottom:4px}
+.item-name{font-size:12px;font-weight:900;color:var(--text)}
+.item-desc{font-size:10px;color:var(--dim);margin-top:2px;line-height:1.3}
+.item-price{font-size:12px;font-weight:800;color:var(--gold);margin-top:6px}
+.item-owned-tag{font-size:10px;color:var(--green);font-weight:800;margin-top:4px}
+.item-equipped-tag{font-size:10px;color:var(--gold);font-weight:800;margin-top:4px}
+
+/* WAVE INFO */
+.wave-card{margin:0 16px 12px;background:linear-gradient(135deg,rgba(239,68,68,.1),rgba(249,115,22,.05));border:1px solid rgba(239,68,68,.3);border-radius:16px;padding:12px 16px;display:flex;align-items:center;gap:12px}
+.wave-icon{font-size:32px}
+.wave-info{flex:1}
+.wave-title{font-size:14px;font-weight:900;color:var(--text)}
+.wave-desc{font-size:11px;color:var(--dim);margin-top:2px}
+.wave-badge{font-size:11px;font-weight:800;padding:4px 10px;border-radius:10px;background:rgba(239,68,68,.2);color:#fca5a5}
+
+/* OVERLAY/POPUP */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);display:flex;align-items:center;justify-content:center;z-index:100;opacity:0;pointer-events:none;transition:opacity .3s}
+.overlay.show{opacity:1;pointer-events:all}
+.popup{background:var(--card2);border:1px solid var(--border);border-radius:28px;padding:32px 24px;text-align:center;max-width:320px;width:88%;transform:scale(.8);transition:transform .4s cubic-bezier(.34,1.56,.64,1)}
+.overlay.show .popup{transform:scale(1)}
+.pop-emo{font-size:64px;display:block;margin-bottom:10px}
+.pop-title{font-size:22px;font-weight:900;color:var(--gold);margin-bottom:6px}
+.pop-rewards{background:rgba(251,191,36,.08);border-radius:12px;padding:12px;margin:12px 0;font-size:13px;line-height:2}
+.pop-btn{background:linear-gradient(135deg,var(--purple),var(--gold));color:#fff;border:none;padding:14px 32px;border-radius:16px;font-size:15px;font-weight:900;cursor:pointer;margin:4px}
+.pop-btn2{background:var(--card);border:1px solid var(--border);color:var(--text);border:none;padding:14px 32px;border-radius:16px;font-size:15px;font-weight:900;cursor:pointer;margin:4px}
+
+/* TOAST */
+.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-120px);background:var(--green);color:#fff;font-size:14px;font-weight:900;padding:10px 24px;border-radius:30px;z-index:999;transition:transform .4s cubic-bezier(.34,1.56,.64,1);white-space:nowrap}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.toast.gold{background:linear-gradient(135deg,var(--gold),var(--orange))}
+.toast.red{background:var(--red)}
+
+/* DAMAGE FLOAT */
+.dmg-float{position:fixed;pointer-events:none;z-index:300;font-weight:900;font-size:20px;animation:dmg-fly .8s ease-out forwards}
+@keyframes dmg-fly{0%{transform:translateY(0) scale(1);opacity:1}100%{transform:translateY(-80px) scale(.5);opacity:0}}
+
+/* SECTIONS */
+.section-divider{height:1px;background:var(--border);margin:4px 16px 12px}
+</style>
+</head>
+<body>
+
+<div class="toast" id="toast"></div>
+<div class="overlay" id="overlay">
+  <div class="popup" id="popup-content">
+  </div>
+</div>
+
+<!-- TOP NAV -->
+<div class="topnav">
+  <button class="back-btn" onclick="goBack()">← 返回</button>
+  <div class="nav-title">⚔️ 战斗副本</div>
+  <div class="battles-badge" id="battles-badge">今日剩余 3 次</div>
+</div>
+
+<!-- HERO BAR -->
+<div class="hero-bar">
+  <div class="hero-row">
+    <div class="hero-sprite" id="h-sprite">🧙‍♂️</div>
+    <div class="hero-info">
+      <div class="hero-name-sm" id="h-name">新手冒险者</div>
+      <div class="hero-stats-row">
+        ATK <span id="h-atk">10</span> &nbsp;
+        DEF <span id="h-def">5</span> &nbsp;
+        LV <span id="h-lv">1</span>
+      </div>
+    </div>
+  </div>
+  <div class="hp-row">
+    <div class="hp-label">HP</div>
+    <div class="hp-track"><div class="hp-fill hero" id="hero-hp-bar" style="width:100%"></div></div>
+    <div class="hp-num" id="hero-hp-num">100/100</div>
+  </div>
+</div>
+
+<!-- WAVE INFO -->
+<div class="wave-card">
+  <div class="wave-icon" id="wave-icon">🌿</div>
+  <div class="wave-info">
+    <div class="wave-title" id="wave-name">新手村</div>
+    <div class="wave-desc" id="wave-desc">初级怪物出没，适合练级</div>
+  </div>
+  <div class="wave-badge" id="wave-badge">第1波</div>
+</div>
+
+<!-- BATTLE SCENE -->
+<div class="scene">
+  <div class="scene-bg" id="scene-bg">🌿</div>
+  <div class="battle-area">
+    <div class="fighter">
+      <span class="fighter-sprite" id="hero-fig">🧙‍♂️</span>
+      <div class="fighter-name" style="color:#86efac" id="hero-fig-name">勇士</div>
+    </div>
+    <div class="vs-text">VS</div>
+    <div class="fighter">
+      <span class="fighter-sprite" id="enemy-fig">🐛</span>
+      <div class="fighter-name" style="color:#fca5a5" id="enemy-name">毛毛虫</div>
+    </div>
+  </div>
+  <div class="hp-row" style="margin-bottom:8px">
+    <div class="hp-label" style="font-size:10px;color:#fca5a5">敌人</div>
+    <div class="hp-track"><div class="hp-fill enemy" id="enemy-hp-bar" style="width:100%"></div></div>
+    <div class="hp-num" id="enemy-hp-num">20/20</div>
+  </div>
+  <div class="log-box" id="log-box">
+    <div class="log-line info">⚔️ 战斗开始！选择你的技能！</div>
+  </div>
+</div>
+
+<!-- SKILLS -->
+<div class="skills-area">
+  <div class="skills-title">技能栏</div>
+  <div class="skills-grid" id="skills-grid"></div>
+</div>
+
+<div class="section-divider"></div>
+
+<!-- SHOP -->
+<div class="shop-area">
+  <div class="shop-header">
+    <div class="shop-title">装备商店</div>
+    <div class="coins-display">💰 <span id="coins-display">0</span> 金币</div>
+  </div>
+  <div class="shop-grid" id="shop-grid"></div>
+</div>
+
+<script>
+// ── SHARED STATE ──────────────────────────────────────
+let S=JSON.parse(localStorage.getItem('hero_v3')||'null')||{xp:0,streak:0,stars:0,days:0,coins:0,lastDate:'',checked:{},done:false,battlesLeft:3,battleDate:''};
+if(!S.coins)S.coins=0;
+if(!S.equip)S.equip={weapon:null,armor:null,ring:null};
+if(!S.skills)S.skills={unlocked:['attack','defend'],cooldowns:{}};
+if(S.battlesLeft===undefined)S.battlesLeft=3;
+const todayKey=()=>{const d=new Date();return`${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`};
+if(S.battleDate!==todayKey()){S.battlesLeft=3;S.battleDate=todayKey();}
+function save(){localStorage.setItem('hero_v3',JSON.stringify(S))}
+
+// ── LEVEL SYSTEM ──────────────────────────────────────
+const LV_XP=[0,100,220,380,570,800,1080,1420,1830,2320,2900];
+const LV_NAMES=['新手冒险者','初级勇士','铜牌骑士','银牌战士','金牌英雄','白金斗士','钻石强者','精英战神','传奇英雄','无敌霸主','神话帝王'];
+const LV_AVS=['🧙‍♂️','🗡️','🛡️','⚔️','🦸','👑','🔥','💫','🌟','⚡','🏆'];
+function getLv(){let lv=1;for(let i=1;i<LV_XP.length;i++){if(S.xp>=LV_XP[i])lv=i+1;else break;}return Math.min(lv,LV_XP.length)}
+
+// ── EQUIPMENT ─────────────────────────────────────────
+const ITEMS=[
+  {id:'sword1',icon:'🗡️',name:'铁剑',desc:'基础攻击+8',price:30,slot:'weapon',atk:8,def:0},
+  {id:'sword2',icon:'⚔️',name:'精钢剑',desc:'攻击+18',price:80,slot:'weapon',atk:18,def:0},
+  {id:'sword3',icon:'🔱',name:'神圣剑',desc:'攻击+35',price:180,slot:'weapon',atk:35,def:0},
+  {id:'armor1',icon:'🛡️',name:'皮甲',desc:'防御+6',price:25,slot:'armor',atk:0,def:6},
+  {id:'armor2',icon:'⚜️',name:'铁甲',desc:'防御+15',price:70,slot:'armor',atk:0,def:15},
+  {id:'armor3',icon:'🏰',name:'神圣甲',desc:'防御+30',price:160,slot:'armor',atk:0,def:30},
+  {id:'ring1',icon:'💍',name:'力量戒指',desc:'攻击+5 防御+5',price:50,slot:'ring',atk:5,def:5},
+  {id:'ring2',icon:'🔮',name:'魔法宝珠',desc:'攻击+12 防御+8',price:120,slot:'ring',atk:12,def:8},
+];
+if(!S.inventory)S.inventory=[];
+
+function getStats(){
+  const lv=getLv();
+  let atk=8+lv*4;let def=4+lv*2;let maxhp=80+lv*20;
+  ITEMS.forEach(item=>{
+    if(S.equip&&S.equip[item.slot]===item.id){atk+=item.atk;def+=item.def;}
+  });
+  return{atk,def,maxhp};
+}
+
+// ── SKILLS ────────────────────────────────────────────
+const ALL_SKILLS=[
+  {id:'attack',icon:'⚔️',name:'普通攻击',desc:'造成100%攻击伤害',dmgMult:1,healSelf:0,cost:0,cd:0,unlockLv:1},
+  {id:'heavy',icon:'🔨',name:'重击',desc:'造成180%伤害，CD:2回合',dmgMult:1.8,healSelf:0,cost:0,cd:2,unlockLv:2},
+  {id:'defend',icon:'🛡️',name:'格挡',desc:'本回合减少60%伤害',dmgMult:0.3,healSelf:0,cost:0,cd:3,defend:true,unlockLv:1},
+  {id:'heal',icon:'💚',name:'治愈术',desc:'恢复30%最大HP',dmgMult:0,healSelf:0.3,cost:0,cd:4,unlockLv:3},
+  {id:'blaze',icon:'🔥',name:'烈焰斩',desc:'造成250%伤害！CD:3',dmgMult:2.5,healSelf:0,cost:0,cd:3,unlockLv:5},
+  {id:'thunder',icon:'⚡',name:'雷霆击',desc:'造成220%伤害+眩晕',dmgMult:2.2,healSelf:0,stun:true,cost:0,cd:4,unlockLv:7},
+  {id:'dragon',icon:'🐉',name:'龙息',desc:'造成350%史诗伤害！',dmgMult:3.5,healSelf:0,cost:0,cd:5,unlockLv:9},
+];
+
+// ── ENEMIES ───────────────────────────────────────────
+function getEnemyPool(lv){
+  const base=[
+    {icon:'🐛',name:'毛毛虫',hpMult:0.4,atkMult:0.4,expReward:15,coinMin:3,coinMax:8},
+    {icon:'🐸',name:'毒蛙',hpMult:0.6,atkMult:0.6,expReward:25,coinMin:5,coinMax:12},
+    {icon:'🦎',name:'蜥蜴人',hpMult:0.8,atkMult:0.8,expReward:35,coinMin:8,coinMax:18},
+    {icon:'🐺',name:'野狼',hpMult:1.0,atkMult:1.0,expReward:50,coinMin:12,coinMax:25},
+    {icon:'🧟',name:'亡灵骑士',hpMult:1.3,atkMult:1.2,expReward:70,coinMin:18,coinMax:35},
+    {icon:'🐉',name:'幼龙',hpMult:1.6,atkMult:1.5,expReward:100,coinMin:25,coinMax:50},
+    {icon:'👹',name:'魔神',hpMult:2.0,atkMult:1.8,expReward:140,coinMin:35,coinMax:70},
+    {icon:'💀',name:'死亡骑士',hpMult:2.5,atkMult:2.2,expReward:190,coinMin:50,coinMax:100},
+    {icon:'🔥',name:'炎龙王',hpMult:3.2,atkMult:2.8,expReward:260,coinMin:70,coinMax:140},
+    {icon:'⚡',name:'雷神',hpMult:4.0,atkMult:3.5,expReward:350,coinMin:100,coinMax:200},
+  ];
+  const idx=Math.min(Math.floor(lv/1.1),base.length-1);
+  // pick current + maybe one ahead for variety
+  const pool=base.slice(Math.max(0,idx-1),Math.min(base.length,idx+2));
+  return pool[Math.floor(Math.random()*pool.length)];
+}
+
+function getZone(lv){
+  const zones=[
+    {name:'新手村',desc:'初级怪物出没',icon:'🌿',bg:'🌿',minLv:1},
+    {name:'黑暗森林',desc:'危险的树林，小心！',icon:'🌲',bg:'🌲',minLv:2},
+    {name:'沙漠废墟',desc:'灼热的沙漠',icon:'🏜️',bg:'🏜️',minLv:3},
+    {name:'冰川峡谷',desc:'寒冷的冰封世界',icon:'❄️',bg:'❄️',minLv:5},
+    {name:'火山熔岩',desc:'炎热的火山地带',icon:'🌋',bg:'🌋',minLv:7},
+    {name:'魔王城堡',desc:'终极BOSS聚集地',icon:'🏰',bg:'🏰',minLv:9},
+  ];
+  return zones.reduce((acc,z)=>lv>=z.minLv?z:acc,zones[0]);
+}
+
+// ── BATTLE STATE ──────────────────────────────────────
+let battle={
+  active:false,heroHp:0,heroMaxHp:0,enemyHp:0,enemyMaxHp:0,
+  enemy:null,turn:0,defending:false,stunned:false,wave:1,
+  cooldowns:{},battleOver:false
+};
+
+function initBattle(){
+  if(S.battlesLeft<=0){showPopup('😴','今日次数已用完','每天可以战斗3次，明天再来吧！打卡任务完成可以额外获得金币！',false);return;}
+  const lv=getLv();
+  const stats=getStats();
+  const enemy=getEnemyPool(lv);
+  const zone=getZone(lv);
+  const baseEnemyHp=Math.floor(30+lv*25);
+  const baseEnemyAtk=Math.floor(6+lv*3);
+  battle={
+    active:true,
+    heroHp:stats.maxhp,heroMaxHp:stats.maxhp,
+    enemyHp:Math.floor(baseEnemyHp*enemy.hpMult),
+    enemyMaxHp:Math.floor(baseEnemyHp*enemy.hpMult),
+    enemyAtk:Math.floor(baseEnemyAtk*enemy.atkMult),
+    enemy,zone,turn:0,defending:false,stunned:false,wave:1,
+    cooldowns:{},battleOver:false,
+    expReward:Math.floor(enemy.expReward*(0.8+lv*0.1)),
+    coinMin:enemy.coinMin,coinMax:enemy.coinMax,
+  };
+  clearLog();
+  addLog(`⚔️ 遭遇了 ${enemy.icon}${enemy.name}！`, 'info');
+  addLog(`📍 当前区域：${zone.name}`, 'info');
+  renderBattle();
+}
+
+function renderBattle(){
+  const lv=getLv();const stats=getStats();
+  // hero
+  document.getElementById('h-sprite').textContent=LV_AVS[Math.min(lv-1,10)];
+  document.getElementById('h-name').textContent=LV_NAMES[Math.min(lv-1,10)];
+  document.getElementById('h-atk').textContent=stats.atk;
+  document.getElementById('h-def').textContent=stats.def;
+  document.getElementById('h-lv').textContent=lv;
+  document.getElementById('hero-fig').textContent=LV_AVS[Math.min(lv-1,10)];
+  document.getElementById('hero-fig-name').textContent='勇士';
+  document.getElementById('battles-badge').textContent=`今日剩余 ${S.battlesLeft} 次`;
+  document.getElementById('coins-display').textContent=S.coins;
+
+  if(battle.active){
+    // hp bars
+    const hpPct=Math.max(0,battle.heroHp/battle.heroMaxHp*100);
+    const ePct=Math.max(0,battle.enemyHp/battle.enemyMaxHp*100);
+    document.getElementById('hero-hp-bar').style.width=hpPct+'%';
+    document.getElementById('hero-hp-num').textContent=`${Math.max(0,battle.heroHp)}/${battle.heroMaxHp}`;
+    document.getElementById('enemy-hp-bar').style.width=ePct+'%';
+    document.getElementById('enemy-hp-num').textContent=`${Math.max(0,battle.enemyHp)}/${battle.enemyMaxHp}`;
+    document.getElementById('enemy-fig').textContent=battle.enemy.icon;
+    document.getElementById('enemy-name').textContent=battle.enemy.name;
+    document.getElementById('scene-bg').textContent=battle.zone.bg;
+    document.getElementById('wave-icon').textContent=battle.zone.icon;
+    document.getElementById('wave-name').textContent=battle.zone.name;
+    document.getElementById('wave-desc').textContent=battle.zone.desc;
+    document.getElementById('wave-badge').textContent=`第${battle.wave}波`;
+    // dead state
+    document.getElementById('enemy-fig').className='fighter-sprite'+(battle.enemyHp<=0?' dead':'');
+    document.getElementById('hero-fig').className='fighter-sprite'+(battle.heroHp<=0?' dead':'');
+  }else{
+    // not started
+    document.getElementById('hero-hp-bar').style.width='100%';
+    document.getElementById('hero-hp-num').textContent=`${stats.maxhp}/${stats.maxhp}`;
+  }
+
+  renderSkills();
+  renderShop();
+}
+
+function renderSkills(){
+  const grid=document.getElementById('skills-grid');
+  grid.innerHTML='';
+  const lv=getLv();
+  ALL_SKILLS.forEach(sk=>{
+    const unlocked=sk.unlockLv<=lv;
+    const cd=battle.cooldowns[sk.id]||0;
+    const div=document.createElement('div');
+    div.className='skill-btn'+((!battle.active||battle.battleOver||cd>0)?' disabled':'')+(unlocked?'':' locked');
+    div.onclick=()=>useSkill(sk.id);
+    div.innerHTML=`
+      <div class="skill-btn-top">
+        <span class="skill-icon">${sk.icon}</span>
+        <span class="skill-name">${sk.name}</span>
+      </div>
+      <div class="skill-desc">${sk.desc}</div>
+      ${cd>0?`<div class="skill-cd">CD:${cd}</div>`:''}
+      ${!unlocked?`<div class="skill-locked-tag">🔒 LV${sk.unlockLv}解锁</div>`:''}
+    `;
+    grid.appendChild(div);
+  });
+}
+
+function renderShop(){
+  const grid=document.getElementById('shop-grid');
+  grid.innerHTML='';
+  document.getElementById('coins-display').textContent=S.coins;
+  ITEMS.forEach(item=>{
+    const owned=S.inventory&&S.inventory.includes(item.id);
+    const equipped=S.equip&&S.equip[item.slot]===item.id;
+    const div=document.createElement('div');
+    div.className='shop-item'+(equipped?' equipped':owned?' owned':'');
+    div.onclick=()=>buyOrEquip(item.id);
+    div.innerHTML=`
+      <div class="item-icon">${item.icon}</div>
+      <div class="item-name">${item.name}</div>
+      <div class="item-desc">${item.desc}</div>
+      ${equipped?'<div class="item-equipped-tag">✅ 已装备</div>':owned?'<div class="item-owned-tag">已拥有 点击装备</div>':`<div class="item-price">💰 ${item.price}</div>`}
+    `;
+    grid.appendChild(div);
+  });
+}
+
+// ── SKILL USE ─────────────────────────────────────────
+function useSkill(skId){
+  if(!battle.active||battle.battleOver)return;
+  if(battle.cooldowns[skId]>0)return;
+  const sk=ALL_SKILLS.find(s=>s.id===skId);
+  if(!sk)return;
+  const lv=getLv();if(sk.unlockLv>lv)return;
+  const stats=getStats();
+
+  // Hero action
+  battle.turn++;
+  let dmg=0;
+  if(sk.defend){
+    battle.defending=true;
+    addLog(`🛡️ 你摆出防御姿态！伤害大幅减少！`,'hero-atk');
+    animateFighter('hero-fig','attack');
+  } else if(sk.healSelf>0){
+    const healAmt=Math.floor(battle.heroMaxHp*sk.healSelf);
+    battle.heroHp=Math.min(battle.heroMaxHp,battle.heroHp+healAmt);
+    addLog(`💚 治愈！恢复了 ${healAmt} HP！`,'special');
+    animateFighter('hero-fig','attack');
+  } else {
+    dmg=Math.floor(stats.atk*sk.dmgMult*(0.9+Math.random()*0.2));
+    battle.enemyHp-=dmg;
+    addLog(`${sk.icon} ${sk.name}！造成 ${dmg} 点伤害！`,'hero-atk');
+    animateFighter('hero-fig','attack');
+    setTimeout(()=>animateFighter('enemy-fig','hurt'),200);
+    floatDmg(dmg,'enemy',false);
+    if(sk.stun){addLog(`⚡ 敌人被眩晕了！`,'special');battle.stunned=true;}
+  }
+
+  // Set cooldown
+  if(sk.cd>0)battle.cooldowns[skId]=sk.cd;
+  renderBattle();
+
+  // Check enemy dead
+  if(battle.enemyHp<=0){setTimeout(()=>onEnemyDead(),400);return;}
+
+  // Enemy turn (delayed)
+  setTimeout(()=>enemyTurn(stats),800);
+}
+
+function enemyTurn(stats){
+  if(battle.battleOver||battle.enemyHp<=0)return;
+  // Reduce cooldowns
+  Object.keys(battle.cooldowns).forEach(k=>{if(battle.cooldowns[k]>0)battle.cooldowns[k]--});
+
+  if(battle.stunned){
+    addLog(`💫 ${battle.enemy.name} 还在眩晕中，无法行动！`,'info');
+    battle.stunned=false;
+    battle.defending=false;
+    renderBattle();return;
+  }
+
+  // Enemy attacks
+  const defMult=battle.defending?0.4:1;
+  const atkMult=battle.enemyAtk;
+  let enemyDmg=Math.max(1,Math.floor((atkMult-stats.def*0.4)*(0.85+Math.random()*0.3)*defMult));
+  battle.heroHp-=enemyDmg;
+  addLog(`${battle.enemy.icon} ${battle.enemy.name} 攻击！造成 ${enemyDmg} 点伤害！`,'enemy-atk');
+  animateFighter('enemy-fig','attack');
+  setTimeout(()=>animateFighter('hero-fig','hurt'),200);
+  floatDmg(enemyDmg,'hero',true);
+  battle.defending=false;
+  renderBattle();
+
+  if(battle.heroHp<=0){setTimeout(()=>onHeroDead(),400);}
+}
+
+function onEnemyDead(){
+  battle.battleOver=true;
+  const coins=battle.coinMin+Math.floor(Math.random()*(battle.coinMax-battle.coinMin+1));
+  const exp=battle.expReward;
+  S.coins+=coins;S.xp+=exp;save();
+  addLog(`🎉 胜利！击败了 ${battle.enemy.name}！`,'special');
+  addLog(`💰 获得 ${coins} 金币！⭐ +${exp} XP！`,'special');
+  S.battlesLeft--;save();
+  renderBattle();
+  setTimeout(()=>{
+    showPopup('🎊','胜利！',`击败了 ${battle.enemy.icon}${battle.enemy.name}！\n\n💰 +${coins} 金币\n⭐ +${exp} 经验值\n\n今日剩余 ${S.battlesLeft} 次挑战`,true,coins,exp);
+  },600);
+}
+
+function onHeroDead(){
+  battle.battleOver=true;
+  addLog(`💀 你被击败了...下次再来！`,'enemy-atk');
+  S.battlesLeft--;save();
+  renderBattle();
+  setTimeout(()=>{
+    showPopup('💀','战败了...','不要灰心！提升等级和装备后再来挑战！\n\n继续完成打卡任务提升等级吧！',false,0,0);
+  },600);
+}
+
+// ── SHOP ──────────────────────────────────────────────
+function buyOrEquip(itemId){
+  const item=ITEMS.find(i=>i.id===itemId);if(!item)return;
+  if(!S.inventory)S.inventory=[];
+  if(S.inventory.includes(itemId)){
+    // equip/unequip
+    if(S.equip[item.slot]===itemId){S.equip[item.slot]=null;showToast(`卸下了 ${item.name}`);}
+    else{S.equip[item.slot]=itemId;showToast(`✅ 装备了 ${item.name}！+${item.atk>0?'ATK+'+item.atk+' ':''}${item.def>0?'DEF+'+item.def:''}`);}
+    save();renderBattle();
+  } else {
+    if(S.coins<item.price){showToast('💰 金币不足！打怪赚金币！','red');return;}
+    S.coins-=item.price;S.inventory.push(itemId);S.equip[item.slot]=itemId;
+    save();showToast(`🛍️ 购买并装备了 ${item.name}！`,'gold');renderBattle();
+  }
+}
+
+// ── UI HELPERS ────────────────────────────────────────
+function addLog(msg,cls=''){
+  const box=document.getElementById('log-box');
+  const line=document.createElement('div');
+  line.className='log-line '+(cls||'');
+  line.textContent=msg;
+  box.appendChild(line);
+  box.scrollTop=box.scrollHeight;
+}
+function clearLog(){document.getElementById('log-box').innerHTML='';}
+function animateFighter(id,anim){
+  const el=document.getElementById(id);
+  el.className='fighter-sprite';
+  void el.offsetWidth;
+  el.className='fighter-sprite '+anim;
+  setTimeout(()=>el.className='fighter-sprite',500);
+}
+function floatDmg(val,target,isHero){
+  const el=document.createElement('div');el.className='dmg-float';
+  el.textContent=(isHero?'-':'-')+val;
+  el.style.color=isHero?'#fca5a5':'#86efac';
+  const ref=document.getElementById(target==='hero'?'hero-fig':'enemy-fig');
+  const rect=ref.getBoundingClientRect();
+  el.style.left=(rect.left+rect.width/2)+'px';el.style.top=rect.top+'px';
+  document.body.appendChild(el);setTimeout(()=>el.remove(),1000);
+}
+function showToast(msg,type=''){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className='toast '+(type||'');
+  t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);
+}
+function showPopup(emo,title,msg,canContinue,coins,exp){
+  const el=document.getElementById('popup-content');
+  el.innerHTML=`
+    <span class="pop-emo">${emo}</span>
+    <div class="pop-title">${title}</div>
+    <div class="pop-rewards" style="font-size:13px;line-height:2;white-space:pre-line">${msg}</div>
+    <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:8px">
+      ${canContinue&&S.battlesLeft>0?`<button class="pop-btn" onclick="closePopupAndFight()">⚔️ 继续战斗（${S.battlesLeft}次）</button>`:''}
+      <button class="pop-btn2" onclick="closePopup()">查看装备</button>
+      <button class="pop-btn2" onclick="goBack()">返回打卡</button>
+    </div>
+  `;
+  document.getElementById('overlay').classList.add('show');
+}
+function closePopup(){document.getElementById('overlay').classList.remove('show');}
+function closePopupAndFight(){closePopup();setTimeout(initBattle,300);}
+function goBack(){window.location.href='每日打卡.html';}
+
+// ── INIT ──────────────────────────────────────────────
+renderBattle();
+// Auto start if battles left
+if(S.battlesLeft>0){
+  setTimeout(initBattle,500);
+}else{
+  addLog('😴 今日战斗次数已用完！明天再来！','info');
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>今日作业</title>
+<style>
+:root{
+  --bg:#0a0a1a;--card:#12122a;
+  --purple:#7c3aed;--purple2:#a855f7;
+  --gold:#fbbf24;--green:#10b981;
+  --text:#e8e0ff;--dim:#6b5f8f;
+  --border:rgba(124,58,237,0.25);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Arial,sans-serif;background:var(--bg);color:var(--text);padding:16px;padding-bottom:80px}
+h1{font-size:20px;font-weight:900;color:var(--purple2);margin-bottom:4px}
+.sub{font-size:12px;color:var(--dim);margin-bottom:20px}
+.task{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px;margin-bottom:10px;display:flex;align-items:center;gap:12px;cursor:pointer}
+.task.done{border-color:rgba(16,185,129,.5);background:rgba(16,185,129,.07)}
+.chk{width:28px;height:28px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px}
+.task.done .chk{background:var(--green);border-color:var(--green)}
+.task-body{flex:1}
+.task-name{font-size:14px;font-weight:800}
+.task.done .task-name{color:var(--dim);text-decoration:line-through}
+.task-desc{font-size:11px;color:var(--dim);margin-top:2px}
+.task-subject{font-size:10px;font-weight:800;padding:2px 8px;border-radius:8px;margin-left:auto;flex-shrink:0}
+.empty{text-align:center;color:var(--dim);margin-top:60px;font-size:14px;line-height:2}
+.back-btn{position:fixed;bottom:20px;left:16px;right:16px;padding:16px;background:linear-gradient(135deg,var(--purple),var(--purple2));color:#fff;border:none;border-radius:16px;font-size:16px;font-weight:900;cursor:pointer}
+</style>
+</head>
+<body>
+
+<h1>📝 今日作业</h1>
+<div class="sub" id="sub-text">加载中...</div>
+<div id="task-list"></div>
+<button class="back-btn" onclick="goBack()">← 返回勇士日记</button>
+
+<script>
+const SUBJECT_COLORS={
+  '语文':'background:rgba(252,165,165,.15);color:#fca5a5',
+  '数学':'background:rgba(134,239,172,.15);color:#86efac',
+  '英语':'background:rgba(147,197,253,.15);color:#93c5fd',
+  '其他':'background:rgba(251,191,36,.15);color:#fbbf24'
+};
+
+// ✏️ 每天只需要修改这里的作业列表
+const TODAY_TASKS = [
+  {name:'读背U1单词词组句子',desc:'见群里听写内容，准备明默',subject:'英语'},
+  {name:'完成大册P6-7',desc:'认真完成，听力部分注意听音频',subject:'英语'},
+  {name:'复习大，小练错题',desc:'订正错题',subject:'数学'},
+  {name:'完成订正周末卷（一）左边',desc:'认真订正',subject:'数学'},
+  {name:'自主练习',desc:'完成自主练习',subject:'数学'}
+];
+
+function loadTasks(){
+  const list = document.getElementById('task-list');
+  
+  // 读取已保存的完成状态
+  const savedDone = JSON.parse(localStorage.getItem('homework_done')||'{}');
+  
+  // 合并任务和完成状态
+  const tasks = TODAY_TASKS.map((t,i)=>({...t,done:!!savedDone[i]}));
+  
+  const done = tasks.filter(t=>t.done).length;
+  document.getElementById('sub-text').textContent = `今日进度：${done}/${tasks.length} 项完成`;
+  
+  list.innerHTML = '';
+  tasks.forEach((t,i)=>{
+    const div = document.createElement('div');
+    div.className = 'task' + (t.done?' done':'');
+    div.onclick = ()=>toggleTask(i);
+    const color = SUBJECT_COLORS[t.subject]||SUBJECT_COLORS['其他'];
+    div.innerHTML = `
+      <div class="chk">${t.done?'✓':''}</div>
+      <div class="task-body">
+        <div class="task-name">${t.name}</div>
+        <div class="task-desc">${t.desc}</div>
+      </div>
+      <div class="task-subject" style="${color}">${t.subject}</div>
+    `;
+    list.appendChild(div);
+  });
+}
+
+function toggleTask(i){
+  const savedDone = JSON.parse(localStorage.getItem('homework_done')||'{}');
+  savedDone[i] = !savedDone[i];
+  localStorage.setItem('homework_done', JSON.stringify(savedDone));
+  
+  // 必须全部完成才设置
+  const allDone = TODAY_TASKS.every((_,idx)=>savedDone[idx]===true);
+  if(allDone){
+    localStorage.setItem('homework_all_done','true');
+    setTimeout(()=>{
+      alert('🎉 所有作业完成！返回勇士日记领取奖励！');
+      goBack();
+    },500);
+  } else {
+    // 没全部完成就清除标记
+    localStorage.removeItem('homework_all_done');
+  }
+  loadTasks();
+}
+
+function goBack(){
+  window.location.href='每日打卡.html';
+}
+
+loadTasks();
+</script>
+</body>
+</html>

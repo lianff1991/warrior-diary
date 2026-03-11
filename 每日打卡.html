@@ -163,7 +163,7 @@ const TASKS={
   study:[
     {id:'s1',emo:'🔤',name:'英语单词',desc:'每天10个，背完默写过关才算',xp:30},
     {id:'s2',emo:'✍️',name:'语文写字',desc:'5个生字写3遍，明天默写检查',xp:25},
-    {id:'s3',emo:'📝',name:'完成作业',desc:'认真完成所有作业，不拖延',xp:20},
+    {id:'s3',emo:'📝',name:'完成作业',desc:'点击进入今日作业清单',xp:20,link:'今日作业.html'},
     {id:'s4',emo:'📚',name:'课外阅读',desc:'睡前读喜欢的书20分钟',xp:15},
   ],
   night:[
@@ -199,7 +199,7 @@ function renderSection(cat,tid,bid){
     const done=!!S.checked[t.id];
     const d=document.createElement('div');
     d.className='task'+(done?' done':'');
-    d.onclick=()=>toggle(t.id,t.xp,d);
+    d.onclick=()=>toggle(t.id,t.xp,d,t.link);;
     d.innerHTML=`<div class="chk">${done?'✓':''}</div><div class="task-emo">${t.emo}</div><div class="task-body"><div class="task-name">${t.name}</div><div class="task-desc">${t.desc}</div></div><div class="task-xp">+${t.xp}XP</div>`;
     el.appendChild(d);
   });
@@ -208,7 +208,14 @@ function renderSection(cat,tid,bid){
 }
 
 function allTasks(){return Object.values(TASKS).flat()}
-
+// 检查今日作业是否全部完成
+if(localStorage.getItem('homework_all_done')==='true' && !S.checked['s3']){
+  S.checked['s3']=true;
+  S.xp+=20;
+  S.stars+=1;
+  localStorage.removeItem('homework_all_done');
+  save();
+}
 function updateUI(){
   const lv=getLv();const pg=getLvProg();
   document.getElementById('lv-num').textContent=lv;
@@ -242,8 +249,12 @@ battleBtn.textContent=studyDone?'⚔️ 进入战斗副本！':'⚔️ 进入战
   else btn.textContent=`⚔️ 还剩 ${all.length-dc} 个关卡（加油！）`;
 }
 
-function toggle(id,xp,el){
+function toggle(id,xp,el,link){
   if(S.done)return;
+  if(link){
+    window.location.href=link;
+    return;
+  }
   if(S.checked[id]){delete S.checked[id];S.xp=Math.max(0,S.xp-xp);S.stars=Math.max(0,S.stars-1);}
   else{S.checked[id]=true;S.xp+=xp;S.stars+=1;showToast(`⭐ +${xp} XP`);spawnParticles(el);}
   save();updateUI();

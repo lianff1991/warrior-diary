@@ -225,14 +225,14 @@ function getLv(){let lv=1;for(let i=1;i<LV_XP.length;i++){if(S.xp>=LV_XP[i])lv=i
 
 // ── EQUIPMENT ─────────────────────────────────────────
 const ITEMS=[
-  {id:'sword1',icon:'🗡️',name:'铁剑',desc:'基础攻击+8',price:30,slot:'weapon',atk:8,def:0},
-  {id:'sword2',icon:'⚔️',name:'精钢剑',desc:'攻击+18',price:80,slot:'weapon',atk:18,def:0},
-  {id:'sword3',icon:'🔱',name:'神圣剑',desc:'攻击+35',price:180,slot:'weapon',atk:35,def:0},
-  {id:'armor1',icon:'🛡️',name:'皮甲',desc:'防御+6',price:25,slot:'armor',atk:0,def:6},
-  {id:'armor2',icon:'⚜️',name:'铁甲',desc:'防御+15',price:70,slot:'armor',atk:0,def:15},
-  {id:'armor3',icon:'🏰',name:'神圣甲',desc:'防御+30',price:160,slot:'armor',atk:0,def:30},
-  {id:'ring1',icon:'💍',name:'力量戒指',desc:'攻击+5 防御+5',price:50,slot:'ring',atk:5,def:5},
-  {id:'ring2',icon:'🔮',name:'魔法宝珠',desc:'攻击+12 防御+8',price:120,slot:'ring',atk:12,def:8},
+  {id:'sword1',icon:'🦴',name:'百年右臂魂骨',desc:'攻击+8，从百年魂兽获得',price:30,slot:'weapon',atk:8,def:0},
+  {id:'sword2',icon:'💀',name:'千年右臂魂骨',desc:'攻击+18，稀有魂骨',price:80,slot:'weapon',atk:18,def:0},
+  {id:'sword3',icon:'⚡',name:'万年右臂魂骨',desc:'攻击+35，极品魂骨！',price:180,slot:'weapon',atk:35,def:0},
+  {id:'armor1',icon:'🟡',name:'百年魂环',desc:'防御+6，黄色魂环',price:25,slot:'armor',atk:0,def:6},
+  {id:'armor2',icon:'🔴',name:'千年魂环',desc:'防御+15，红色魂环',price:70,slot:'armor',atk:0,def:15},
+  {id:'armor3',icon:'⚫',name:'万年魂环',desc:'防御+30，黑色魂环！',price:160,slot:'armor',atk:0,def:30},
+  {id:'ring1',icon:'🧿',name:'史莱克徽章',desc:'攻击+5 防御+5，史莱克七怪专属',price:50,slot:'ring',atk:5,def:5},
+  {id:'ring2',icon:'👑',name:'封号斗罗令牌',desc:'攻击+12 防御+8，顶级荣耀',price:120,slot:'ring',atk:12,def:8},
 ];
 if(!S.inventory)S.inventory=[];
 
@@ -244,46 +244,56 @@ function getStats(){
   });
   return{atk,def,maxhp};
 }
-
+const STORIES={
+  1:'📖 唐三被史莱克学院录取，院长奥斯卡说：这里只招收怪物！唐三握紧拳头，我一定会成为最强的魂师...',
+  2:'📖 唐三在幽冥百年森林遇到小舞，两人一见如故，结成搭档。小舞说：你是我见过最努力的人！',
+  3:'📖 史莱克七怪集结！唐三、小舞、奥斯卡、宁荣荣、朱竹清、戴沐白、马红俊，七人共同出发！',
+  4:'📖 唐三获得第一个魂环！蓝银草散发出耀眼光芒，魂力突破三十级！',
+  5:'📖 唐三在星斗大森林修炼，遭遇万年魂兽天蓝牛蛙，一场惊天大战即将开始...',
+  6:'📖 武魂殿黑袍人现身！比比东说：史莱克的孩子们，你们挡了我的路！唐三怒吼：绝不退缩！',
+  7:'📖 千仞雪脱下面具，竟是绝世容颜！她说：唐三，加入武魂殿，我给你一切。唐三：对不起，我有小舞。',
+  8:'📖 昊天锤觉醒！唐三双武魂合璧，蓝银皇与昊天锤同时爆发，魂力冲破七十级！',
+  9:'📖 最终决战！比比东封号斗罗现身，九个魂环在她身后亮起。唐三深吸一口气：今天，就是我封号之日！',
+  10:'🏆 唐三成为封号斗罗！史莱克学院沸腾了，小舞泪流满面。唐三看着天空：爸爸，我做到了！',
+};
 // ── SKILLS ────────────────────────────────────────────
 const ALL_SKILLS=[
-  {id:'attack',icon:'⚔️',name:'普通攻击',desc:'造成100%攻击伤害',dmgMult:1,healSelf:0,cost:0,cd:0,unlockLv:1},
-  {id:'heavy',icon:'🔨',name:'重击',desc:'造成180%伤害，CD:2回合',dmgMult:1.8,healSelf:0,cost:0,cd:2,unlockLv:2},
-  {id:'defend',icon:'🛡️',name:'格挡',desc:'本回合减少60%伤害',dmgMult:0.3,healSelf:0,cost:0,cd:3,defend:true,unlockLv:1},
-  {id:'heal',icon:'💚',name:'治愈术',desc:'恢复30%最大HP',dmgMult:0,healSelf:0.3,cost:0,cd:4,unlockLv:3},
-  {id:'blaze',icon:'🔥',name:'烈焰斩',desc:'造成250%伤害！CD:3',dmgMult:2.5,healSelf:0,cost:0,cd:3,unlockLv:5},
-  {id:'thunder',icon:'⚡',name:'雷霆击',desc:'造成220%伤害+眩晕',dmgMult:2.2,healSelf:0,stun:true,cost:0,cd:4,unlockLv:7},
-  {id:'dragon',icon:'🐉',name:'龙息',desc:'造成350%史诗伤害！',dmgMult:3.5,healSelf:0,cost:0,cd:5,unlockLv:9},
+  {id:'attack',icon:'👊',name:'蓝银草缠绕',desc:'唐三基础魂技，造成100%伤害',dmgMult:1,healSelf:0,cost:0,cd:0,unlockLv:1},
+  {id:'heavy',icon:'🔵',name:'蓝银领域',desc:'蓝银草爆发！造成180%伤害，CD:2',dmgMult:1.8,healSelf:0,cost:0,cd:2,unlockLv:2},
+  {id:'defend',icon:'🛡️',name:'玄天宝录护体',desc:'九宫白骨爪防御，减少60%伤害',dmgMult:0,healSelf:0,cost:0,cd:3,defend:true,unlockLv:1},
+  {id:'heal',icon:'💛',name:'小舞守护',desc:'小舞出现！恢复30%HP',dmgMult:0,healSelf:0.3,cost:0,cd:4,unlockLv:3},
+  {id:'blaze',icon:'🔱',name:'八蛛矛突刺',desc:'昊天锤爆发！造成250%伤害！CD:3',dmgMult:2.5,healSelf:0,cost:0,cd:3,unlockLv:5},
+  {id:'thunder',icon:'⚡',name:'雷火齐鸣',desc:'雷火同源！造成220%伤害+眩晕！CD:4',dmgMult:2.2,healSelf:0,stun:true,cost:0,cd:4,unlockLv:7},
+  {id:'dragon',icon:'🌀',name:'天青牛蛙领域',desc:'终极魂技！造成350%伤害！',dmgMult:3.5,healSelf:0,cost:0,cd:5,unlockLv:9},
 ];
 
 // ── ENEMIES ───────────────────────────────────────────
 function getEnemyPool(lv){
   const base=[
-    {icon:'🐛',name:'毛毛虫',hpMult:0.4,atkMult:0.4,expReward:15,coinMin:3,coinMax:8},
-    {icon:'🐸',name:'毒蛙',hpMult:0.6,atkMult:0.6,expReward:25,coinMin:5,coinMax:12},
-    {icon:'🦎',name:'蜥蜴人',hpMult:0.8,atkMult:0.8,expReward:35,coinMin:8,coinMax:18},
-    {icon:'🐺',name:'野狼',hpMult:1.0,atkMult:1.0,expReward:50,coinMin:12,coinMax:25},
-    {icon:'🧟',name:'亡灵骑士',hpMult:1.3,atkMult:1.2,expReward:70,coinMin:18,coinMax:35},
-    {icon:'🐉',name:'幼龙',hpMult:1.6,atkMult:1.5,expReward:100,coinMin:25,coinMax:50},
-    {icon:'👹',name:'魔神',hpMult:2.0,atkMult:1.8,expReward:140,coinMin:35,coinMax:70},
-    {icon:'💀',name:'死亡骑士',hpMult:2.5,atkMult:2.2,expReward:190,coinMin:50,coinMax:100},
-    {icon:'🔥',name:'炎龙王',hpMult:3.2,atkMult:2.8,expReward:260,coinMin:70,coinMax:140},
-    {icon:'⚡',name:'雷神',hpMult:4.0,atkMult:3.5,expReward:350,coinMin:100,coinMax:200},
+    {icon:'🐟',name:'百年水蛇魂兽',hpMult:0.4,atkMult:0.4,expReward:15,coinMin:3,coinMax:8},
+    {icon:'🐺',name:'百年狼魂兽',hpMult:0.6,atkMult:0.6,expReward:25,coinMin:5,coinMax:12},
+    {icon:'🦅',name:'千年金雕魂兽',hpMult:0.8,atkMult:0.8,expReward:35,coinMin:8,coinMax:18},
+    {icon:'🐯',name:'千年白虎魂兽',hpMult:1.0,atkMult:1.0,expReward:50,coinMin:12,coinMax:25},
+    {icon:'🦁',name:'万年雪狮魂兽',hpMult:1.3,atkMult:1.2,expReward:70,coinMin:18,coinMax:35},
+    {icon:'🐲',name:'万年天蓝牛蛙',hpMult:1.6,atkMult:1.5,expReward:100,coinMin:25,coinMax:50},
+    {icon:'👤',name:'武魂殿黑袍人',hpMult:2.0,atkMult:1.8,expReward:140,coinMin:35,coinMax:70},
+    {icon:'🗡️',name:'武魂殿长老',hpMult:2.5,atkMult:2.2,expReward:190,coinMin:50,coinMax:100},
+    {icon:'👸',name:'千仞雪',hpMult:3.2,atkMult:2.8,expReward:260,coinMin:70,coinMax:140},
+    {icon:'👑',name:'比比东封号斗罗',hpMult:4.0,atkMult:3.5,expReward:350,coinMin:100,coinMax:200},
   ];
   const idx=Math.min(Math.floor(lv/1.1),base.length-1);
-  // pick current + maybe one ahead for variety
   const pool=base.slice(Math.max(0,idx-1),Math.min(base.length,idx+2));
   return pool[Math.floor(Math.random()*pool.length)];
 }
 
 function getZone(lv){
   const zones=[
-    {name:'新手村',desc:'初级怪物出没',icon:'🌿',bg:'🌿',minLv:1},
-    {name:'黑暗森林',desc:'危险的树林，小心！',icon:'🌲',bg:'🌲',minLv:2},
-    {name:'沙漠废墟',desc:'灼热的沙漠',icon:'🏜️',bg:'🏜️',minLv:3},
-    {name:'冰川峡谷',desc:'寒冷的冰封世界',icon:'❄️',bg:'❄️',minLv:5},
-    {name:'火山熔岩',desc:'炎热的火山地带',icon:'🌋',bg:'🌋',minLv:7},
-    {name:'魔王城堡',desc:'终极BOSS聚集地',icon:'🏰',bg:'🏰',minLv:9},
+    {name:'史莱克学院',desc:'唐三刚入学，开始修炼之路',icon:'🏫',bg:'🏫',minLv:1},
+    {name:'幽冥百年森林',desc:'百年魂兽出没，小心！',icon:'🌲',bg:'🌲',minLv:2},
+    {name:'沙罗学院擂台',desc:'与沙罗学院展开对决',icon:'⚔️',bg:'⚔️',minLv:3},
+    {name:'星斗大森林',desc:'千年魂兽盘踞之地',icon:'🌟',bg:'🌟',minLv:5},
+    {name:'武魂殿圣地',desc:'武魂殿精英守卫',icon:'🏯',bg:'🏯',minLv:7},
+    {name:'封号斗罗领域',desc:'终极挑战，比比东亲临！',icon:'👑',bg:'👑',minLv:9},
   ];
   return zones.reduce((acc,z)=>lv>=z.minLv?z:acc,zones[0]);
 }
@@ -477,13 +487,25 @@ function onEnemyDead(){
   battle.battleOver=true;
   const coins=battle.coinMin+Math.floor(Math.random()*(battle.coinMax-battle.coinMin+1));
   const exp=battle.expReward;
-  S.coins+=coins;S.xp+=exp;save();
+  S.coins+=coins;S.xp+=exp;
+  
+  // 解锁剧情
+  const lv=getLv();
+  if(!S.unlockedStories)S.unlockedStories=[];
+  let storyText='';
+  if(STORIES[lv]&&!S.unlockedStories.includes(lv)){
+    S.unlockedStories.push(lv);
+    storyText='\n\n'+STORIES[lv];
+  }
+  
+  save();
   addLog(`🎉 胜利！击败了 ${battle.enemy.name}！`,'special');
   addLog(`💰 获得 ${coins} 金币！⭐ +${exp} XP！`,'special');
+  if(storyText)addLog(`📖 新剧情解锁！`,'special');
   S.battlesLeft--;save();
   renderBattle();
   setTimeout(()=>{
-    showPopup('🎊','胜利！',`击败了 ${battle.enemy.icon}${battle.enemy.name}！\n\n💰 +${coins} 金币\n⭐ +${exp} 经验值\n\n今日剩余 ${S.battlesLeft} 次挑战`,true,coins,exp);
+    showPopup('🎊','胜利！',`击败了 ${battle.enemy.icon}${battle.enemy.name}！\n\n💰 +${coins} 金币\n⭐ +${exp} 经验值\n今日剩余 ${S.battlesLeft} 次挑战${storyText}`,true,coins,exp);
   },600);
 }
 
